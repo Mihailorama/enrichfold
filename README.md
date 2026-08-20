@@ -64,6 +64,53 @@ assert result.requires_review is True
 claim. This distinction makes it possible to keep model-produced hypotheses
 without presenting them as observed facts.
 
+## Multi-provider research runs
+
+`ResearchEngine` is the boundary for applications that call several research
+providers. It runs caller-owned adapters concurrently, reserves generic units
+before starting work, retains each provider outcome, and returns an explicit
+coverage/review state. It does not make network calls itself.
+
+```python
+from enrichfold import (
+    Claim,
+    Evidence,
+    Entity,
+    ProviderOutput,
+    ProviderSpec,
+    ResearchBudget,
+    ResearchEngine,
+)
+
+def official_site(entity):
+    # The host application owns this adapter, its HTTP client, and credentials.
+    return ProviderOutput(
+        claims=(Claim(
+            field="industry",
+            value="software",
+            evidence=Evidence(
+                source_url="https://example.com/about",
+                observed_at="2026-08-20T12:00:00Z",
+                confidence=0.9,
+            ),
+        ),),
+        usage_units=2,
+    )
+
+result = ResearchEngine(
+    [ProviderSpec("official-site", official_site, reserved_units=2)],
+    budget=ResearchBudget(max_units=5),
+).run(Entity.company(domain="example.com"), requested_fields=("industry",))
+
+assert result.status in {"completed", "partial", "needs_review", "failed"}
+assert result.budget.reserved_units == 2
+```
+
+An optional `EvidenceValidator` can return `EvidenceVerdict("needs_review",
+reason)` for a weak source or `EvidenceVerdict("rejected", reason)` to keep
+it out of resolution. In either case, the result preserves the original claim,
+source URL, and verdict in `evidence_assessments`.
+
 ## Company identity gate
 
 Before a caller enriches or acts on a company, use the offline identity gate.
@@ -91,6 +138,10 @@ assert identity.canonical_domain == "acme.example"
 - No inferred facts: a field is returned only when a provider supplies evidence.
 - Conflicts have a deterministic suggested value but are marked `needs_review`.
 - Inferred claims are always marked `needs_review`.
+- Multi-provider runs reserve caller-defined generic units before execution and
+  expose partial coverage rather than hiding failed or skipped providers.
+- Optional source-policy hooks can accept, reject, or route evidence to review;
+  the package never fetches or validates URLs on its own.
 - Company identity is verified only through an exact name/domain match or
   caller-supplied, independently verified same-domain site metadata.
 - Bring your own providers for search engines, public data APIs, browser tools, or
