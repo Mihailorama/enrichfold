@@ -1,0 +1,31 @@
+name: Publish TypeScript package to npm
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    # Python releases use publish.yml. Prefix Node releases with node-v, e.g. node-v0.1.1.
+    if: startsWith(github.event.release.tag_name, 'node-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: packages/node
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - uses: oven-sh/setup-bun@v2
+      - name: Verify package
+        run: |
+          bun install --frozen-lockfile
+          bun test
+          bun run build
+      - name: Publish to npm
+        run: npm publish
