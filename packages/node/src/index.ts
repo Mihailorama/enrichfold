@@ -54,6 +54,11 @@ export type CompanyIdentityInput = {
   verifiedSiteIdentity?: SiteIdentity | null;
   freeEmailDomains?: Iterable<string>;
   genericCompanyNames?: Iterable<string>;
+  /**
+   * Consumer-owned transliteration for matching a company name to a domain.
+   * The displayed identity name remains unchanged.
+   */
+  normalizeCompanyNameForDomain?: (name: string) => string;
 };
 
 const DOMAIN_PATTERN = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i;
@@ -121,10 +126,14 @@ function domainsMatch(left: string, right: string): boolean {
   return left === right || left.endsWith(`.${right}`) || right.endsWith(`.${left}`);
 }
 
-export function companyNameMatchesDomain(name: string, domain: string): boolean {
+export function companyNameMatchesDomain(
+  name: string,
+  domain: string,
+  normalizeName: (name: string) => string = (value) => value.toLocaleLowerCase("en-US").replace(/[^a-z0-9]/g, ""),
+): boolean {
   const labels = domain.toLocaleLowerCase("en-US").replace(/^www\./, "").split(".");
   if (labels.length !== 2) return false;
-  const normalizedName = name.toLocaleLowerCase("en-US").replace(/[^a-z0-9]/g, "");
+  const normalizedName = normalizeName(name).toLocaleLowerCase("en-US").replace(/[^a-z0-9]/g, "");
   return Boolean(normalizedName) && normalizedName === labels[0].replace(/-/g, "");
 }
 
@@ -165,14 +174,14 @@ export function deriveCompanyIdentity(input: CompanyIdentityInput): CompanyIdent
   ) {
     return identity("verified", name, websiteDomain, slug, "corporate_email_domain_site_metadata");
   }
-  if (websiteDomain && companyNameMatchesDomain(name, websiteDomain)) {
+  if (websiteDomain && companyNameMatchesDomain(name, websiteDomain, input.normalizeCompanyNameForDomain)) {
     return identity("verified", name, websiteDomain, slug, "matching_email_and_website");
   }
   if (websiteDomain) return identity("needs_review", name, websiteDomain, slug, "corporate_email_domain_unverified");
   if (isFreeEmailDomain(emailDomain, freeDomains)) {
     return identity("needs_review", name, null, slug, "free_email_without_website");
   }
-  if (companyNameMatchesDomain(name, emailDomain)) {
+  if (companyNameMatchesDomain(name, emailDomain, input.normalizeCompanyNameForDomain)) {
     return identity("verified", name, emailDomain, slug, "corporate_email_domain");
   }
   return identity("needs_review", name, emailDomain, slug, "corporate_email_domain_unverified");

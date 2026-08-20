@@ -1,6 +1,6 @@
 {
   "name": "@mihailorama/enrichfold",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Provider-neutral, provenance-first entity enrichment for TypeScript.",
   "license": "MIT",
   "author": "Mihail R.",

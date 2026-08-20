@@ -3,6 +3,10 @@
 Provider-neutral, offline-first company identity gates for TypeScript. This
 package makes no network calls and owns no credentials, storage, or outreach.
 
+For non-Latin brands, `normalizeCompanyNameForDomain` can preserve the host
+application's transliteration rules while Enrichfold owns the review-first
+identity decision.
+
 ```ts
 import { deriveCompanyIdentity } from "@mihailorama/enrichfold";
 
