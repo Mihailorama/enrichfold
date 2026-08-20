@@ -1,12 +1,20 @@
-"""Provider orchestration and deterministic conflict resolution."""
+"""Provider orchestration and review-safe deterministic reconciliation."""
 
 from __future__ import annotations
 
-import json
 from collections.abc import Callable, Iterable, Sequence
 from typing import Protocol
 
-from .models import EnrichmentResult, Entity, Evidence, ResolvedAttribute
+from .models import (
+    Claim,
+    EnrichmentResult,
+    Entity,
+    Evidence,
+    FieldResolution,
+    ReconciliationResult,
+    ResolvedAttribute,
+    canonical_value,
+)
 
 
 class DiscoveryProvider(Protocol):
@@ -18,6 +26,54 @@ class DiscoveryProvider(Protocol):
 Provider = DiscoveryProvider | Callable[[Entity], Iterable[Evidence]]
 
 
+def _rank(claim: Claim) -> tuple[int, float, str, str]:
+    """Rank observed evidence before inference, then use reproducible tie-breaks."""
+
+    return (
+        0 if claim.kind == "observed" else 1,
+        -claim.evidence.confidence,
+        claim.evidence.source_url,
+        canonical_value(claim.value),
+    )
+
+
+def reconcile_claims(claims: Iterable[Claim]) -> ReconciliationResult:
+    """Resolve claims deterministically while failing closed on disagreement.
+
+    Multiple claims for the same canonical value reinforce one another. Distinct
+    values are retained as alternatives and make the field ``needs_review``;
+    an inferred winning value also requires review. This lets an application
+    choose its own approval workflow without losing provenance.
+    """
+
+    by_field: dict[str, list[Claim]] = {}
+    for claim in claims:
+        by_field.setdefault(claim.field.strip(), []).append(claim)
+
+    fields: dict[str, FieldResolution] = {}
+    for name, field_claims in by_field.items():
+        by_value: dict[str, list[Claim]] = {}
+        for claim in field_claims:
+            by_value.setdefault(canonical_value(claim.value), []).append(claim)
+
+        representatives = [min(group, key=_rank) for group in by_value.values()]
+        chosen = min(representatives, key=_rank)
+        alternatives = tuple(
+            claim
+            for claim in sorted(representatives, key=_rank)
+            if canonical_value(claim.value) != canonical_value(chosen.value)
+        )
+        status = "needs_review" if alternatives or chosen.kind == "inferred" else "accepted"
+        fields[name] = FieldResolution(
+            value=chosen.value,
+            evidence=chosen.evidence,
+            kind=chosen.kind,
+            status=status,
+            alternatives=alternatives,
+        )
+    return ReconciliationResult(fields=fields)
+
+
 class EnrichmentPipeline:
     """Combine provider evidence without making network calls itself."""
 
@@ -25,28 +81,30 @@ class EnrichmentPipeline:
         self._providers = tuple(providers)
 
     def enrich(self, entity: Entity, *, requested_fields: Iterable[str] = ()) -> EnrichmentResult:
-        candidates: dict[str, list[Evidence]] = {}
+        claims: list[Claim] = []
         for provider in self._providers:
             discovered = provider.discover(entity) if hasattr(provider, "discover") else provider(entity)
             for evidence in discovered:
-                for attribute in evidence.attributes:
-                    candidates.setdefault(attribute, []).append(evidence)
+                claims.extend(
+                    Claim(field=attribute, value=value, evidence=evidence)
+                    for attribute, value in evidence.attributes.items()
+                )
 
-        resolved: dict[str, ResolvedAttribute] = {}
-        for attribute, evidence_items in candidates.items():
-            best = min(evidence_items, key=lambda item: self._rank(item, attribute))
-            resolved[attribute] = ResolvedAttribute(
-                value=best.attributes[attribute],
-                source_url=best.source_url,
-                observed_at=best.observed_at,
-                confidence=best.confidence,
+        reconciled = reconcile_claims(claims)
+        resolved = {
+            attribute: ResolvedAttribute(
+                value=resolution.value,
+                source_url=resolution.evidence.source_url,
+                observed_at=resolution.evidence.observed_at,
+                confidence=resolution.evidence.confidence,
             )
-
+            for attribute, resolution in reconciled.fields.items()
+        }
         requested = tuple(dict.fromkeys(field.strip() for field in requested_fields if field.strip()))
         missing = tuple(field for field in requested if field not in resolved)
-        return EnrichmentResult(entity=entity, attributes=resolved, missing=missing)
-
-    @staticmethod
-    def _rank(evidence: Evidence, attribute: str) -> tuple[float, str, str]:
-        value = json.dumps(evidence.attributes[attribute], sort_keys=True, default=str)
-        return (-evidence.confidence, evidence.source_url, value)
+        return EnrichmentResult(
+            entity=entity,
+            attributes=resolved,
+            missing=missing,
+            review_fields=reconciled.review_fields,
+        )
