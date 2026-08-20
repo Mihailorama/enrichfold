@@ -153,9 +153,24 @@ with the host application.
 
 ## Installation
 
+### Python
+
 ```bash
 pip install enrichfold
 ```
+
+### TypeScript / Node.js
+
+The TypeScript companion currently exposes the same offline company identity
+gate. It is intentionally a normal npm dependency, rather than a Python
+subprocess hidden inside a web application:
+
+```bash
+npm install @mihailorama/enrichfold
+```
+
+Its provider runtime will follow as a compatible TypeScript surface; Python and
+TypeScript package versions are released independently.
 
 ## Development
 

@@ -1,0 +1,51 @@
+{
+  "name": "@mihailorama/enrichfold",
+  "version": "0.1.0",
+  "description": "Provider-neutral, provenance-first entity enrichment for TypeScript.",
+  "license": "MIT",
+  "author": "Mihail R.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mihailorama/enrichfold.git",
+    "directory": "packages/node"
+  },
+  "homepage": "https://github.com/Mihailorama/enrichfold#readme",
+  "bugs": {
+    "url": "https://github.com/Mihailorama/enrichfold/issues"
+  },
+  "keywords": [
+    "enrichment",
+    "entity-resolution",
+    "provenance",
+    "research",
+    "identity"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "bun test",
+    "prepack": "bun run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
