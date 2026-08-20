@@ -56,4 +56,19 @@ describe("deriveCompanyIdentity", () => {
       reason: "corporate_email_domain_unverified",
     });
   });
+
+  test("allows a caller to normalize non-Latin company names for domain matching", () => {
+    expect(
+      deriveCompanyIdentity({
+        email: "media@drom.ru",
+        companyName: "Дром",
+        website: null,
+        normalizeCompanyNameForDomain: (name) => (name === "Дром" ? "drom" : name),
+      }),
+    ).toMatchObject({
+      status: "verified",
+      canonicalDomain: "drom.ru",
+      reason: "corporate_email_domain",
+    });
+  });
 });
