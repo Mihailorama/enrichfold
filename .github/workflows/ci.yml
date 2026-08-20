@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,3 +18,18 @@ jobs:
           python -m pip install --upgrade pip pytest
           python -m pip install .
           pytest -q
+
+  node:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/node
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Test and package TypeScript companion
+        run: |
+          bun install --frozen-lockfile
+          bun test
+          bun run build
+          npm pack --dry-run
