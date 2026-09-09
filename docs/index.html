@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Enrichfold is an open-source, provenance-first entity enrichment library for people and companies.">
+  <meta name="theme-color" content="#f4f1e9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111613" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="Enrichfold | Enrichment you can audit">
+  <meta property="og:description" content="Resolve people and companies without losing the source behind each field.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mihailorama.github.io/enrichfold/">
+  <meta property="og:image" content="https://mihailorama.github.io/enrichfold/assets/evidence-fold.png">
+  <link rel="canonical" href="https://mihailorama.github.io/enrichfold/">
+  <title>Enrichfold | Enrichment you can audit</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f1e9;
+      --surface: #fffdf8;
+      --surface-strong: #e9e5db;
+      --ink: #14201a;
+      --muted: #566159;
+      --line: #c9cec6;
+      --accent: #136b4c;
+      --accent-ink: #ffffff;
+      --code: #17231d;
+      --code-ink: #e7efe9;
+      --shadow: 0 24px 70px rgba(35, 43, 38, .12);
+      --radius: 16px;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 17px;
+      line-height: 1.6;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: inherit; }
+    img { display: block; max-width: 100%; }
+    figure { margin: 0; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    .shell {
+      width: min(var(--max), calc(100% - 48px));
+      margin-inline: auto;
+    }
+
+    .site-header {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 760;
+      letter-spacing: -.03em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 25px;
+      height: 25px;
+      color: var(--accent);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      font-size: .89rem;
+      font-weight: 620;
+      white-space: nowrap;
+    }
+
+    nav a { text-decoration: none; }
+    nav a:hover { color: var(--accent); }
+
+    .hero {
+      min-height: 690px;
+      padding: 90px 0 74px;
+      display: grid;
+      grid-template-columns: minmax(0, .86fr) minmax(440px, 1.14fr);
+      gap: clamp(44px, 7vw, 96px);
+      align-items: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 20px;
+      color: var(--accent);
+      font-size: .78rem;
+      font-weight: 760;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 720px;
+      margin-bottom: 26px;
+      font-size: clamp(3.3rem, 6vw, 5.8rem);
+      line-height: .93;
+      letter-spacing: -.072em;
+      text-wrap: balance;
+    }
+
+    .hero-line { display: block; white-space: nowrap; }
+
+    .hero-copy > p:not(.eyebrow) {
+      max-width: 560px;
+      margin-bottom: 34px;
+      color: var(--muted);
+      font-size: clamp(1.08rem, 2vw, 1.28rem);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .button {
+      min-height: 48px;
+      padding: 11px 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--ink);
+      font-size: .92rem;
+      font-weight: 720;
+      text-decoration: none;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .button:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .button.primary { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+
+    .hero-art {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      transform: rotate(1.4deg);
+    }
+
+    .hero-art img { width: 100%; height: auto; }
+
+    .principles {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .principle { padding: 30px 30px 30px 0; }
+    .principle + .principle { padding-left: 30px; border-left: 1px solid var(--line); }
+
+    .principle strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 1rem;
+      letter-spacing: -.02em;
+    }
+
+    .principle span { color: var(--muted); font-size: .91rem; }
+
+    section { padding: 118px 0; }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, .72fr) minmax(0, 1.28fr);
+      gap: clamp(56px, 9vw, 132px);
+      align-items: start;
+    }
+
+    .section-copy { position: sticky; top: 36px; }
+
+    h2 {
+      margin-bottom: 22px;
+      font-size: clamp(2.4rem, 5vw, 4.5rem);
+      line-height: 1;
+      letter-spacing: -.06em;
+      text-wrap: balance;
+    }
+
+    .section-copy p { max-width: 460px; color: var(--muted); }
+
+    .proof-list { border-top: 1px solid var(--line); }
+
+    .proof-item {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 22px;
+      padding: 29px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .proof-index {
+      color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      font-size: 1.2rem;
+      letter-spacing: -.03em;
+    }
+
+    .proof-item p { margin-bottom: 0; color: var(--muted); font-size: .95rem; }
+
+    .keenable {
+      background: var(--ink);
+      color: var(--bg);
+    }
+
+    .keenable .eyebrow { color: #72d5ad; }
+    .keenable .section-copy p { color: #bbc8c0; }
+
+    .code-card {
+      overflow: hidden;
+      border: 1px solid #3a4840;
+      border-radius: var(--radius);
+      background: var(--code);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, .22);
+    }
+
+    .code-head {
+      min-height: 52px;
+      padding: 0 16px 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid #39483f;
+      color: #a9b8af;
+      font: 600 .76rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .copy-button {
+      min-height: 34px;
+      padding: 7px 11px;
+      border: 1px solid #526159;
+      border-radius: 9px;
+      background: transparent;
+      color: #e7efe9;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .copy-button:hover { border-color: #72d5ad; }
+
+    pre {
+      margin: 0;
+      padding: 28px;
+      overflow-x: auto;
+      color: var(--code-ink);
+      font: .83rem/1.72 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      tab-size: 2;
+    }
+
+    .kw { color: #72d5ad; }
+    .str { color: #e9bd7d; }
+    .comment { color: #809188; }
+
+    .quickstart {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 40px;
+      align-items: end;
+      padding: 72px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .quickstart h2 { max-width: 720px; margin-bottom: 18px; }
+    .quickstart p { max-width: 610px; margin-bottom: 0; color: var(--muted); }
+
+    footer {
+      min-height: 104px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    footer a { color: var(--ink); font-weight: 650; text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    :focus-visible { outline: 3px solid #e9bd7d; outline-offset: 3px; }
+
+    @media (max-width: 900px) {
+      .hero { min-height: auto; grid-template-columns: 1fr; padding-top: 72px; }
+      .hero-copy { max-width: 700px; }
+      .hero-art { width: min(760px, 100%); transform: none; }
+      .section-grid { grid-template-columns: 1fr; }
+      .section-copy { position: static; }
+      .quickstart { grid-template-columns: 1fr; padding: 52px; }
+    }
+
+    @media (max-width: 640px) {
+      body { font-size: 16px; }
+      .shell { width: min(100% - 32px, var(--max)); }
+      .site-header { min-height: 64px; }
+      nav a:not(:last-child) { display: none; }
+      nav { gap: 0; }
+      .hero { padding: 62px 0 58px; gap: 44px; }
+      h1 { font-size: clamp(3rem, 13.4vw, 4.7rem); }
+      .hero-copy > p:not(.eyebrow) { font-size: 1.06rem; }
+      .actions { flex-direction: column; }
+      .button { width: 100%; }
+      .principles { grid-template-columns: 1fr; }
+      .principle { padding: 24px 0; }
+      .principle + .principle { padding-left: 0; border-top: 1px solid var(--line); border-left: 0; }
+      section { padding: 86px 0; }
+      .proof-item { grid-template-columns: 28px 1fr; gap: 14px; }
+      pre { padding: 22px 18px; font-size: .74rem; }
+      .quickstart { padding: 34px 26px; }
+      footer { padding: 28px 0; align-items: flex-start; flex-direction: column; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111613;
+        --surface: #18201b;
+        --surface-strong: #202a24;
+        --ink: #edf3ee;
+        --muted: #a7b3aa;
+        --line: #354139;
+        --accent: #63c89f;
+        --accent-ink: #0d2118;
+        --shadow: 0 24px 70px rgba(0, 0, 0, .3);
+      }
+      .hero-art { opacity: .92; }
+      .keenable { background: #0b0f0d; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="shell site-header">
+    <a class="brand" href="#top" aria-label="Enrichfold home">
+      <svg class="brand-mark" viewBox="0 0 28 28" aria-hidden="true">
+        <path d="M3 3h14l8 8v14H11l-8-8V3Z" fill="none" stroke="currentColor" stroke-width="2"/>
+        <path d="M17 3v8h8M3 17h8v8" fill="none" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      Enrichfold
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="#why">Why Enrichfold</a>
+      <a href="#keenable">Keenable</a>
+      <a href="#quickstart">Install</a>
+      <a href="https://github.com/Mihailorama/enrichfold">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <div class="shell hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Open-source entity enrichment</p>
+        <h1><span class="hero-line">Enrichment</span><span class="hero-line">you can audit.</span></h1>
+        <p>Resolve people and companies without losing the source behind each field.</p>
+        <div class="actions">
+          <a class="button primary" href="#quickstart">Install with pip</a>
+          <a class="button" href="https://github.com/Mihailorama/enrichfold">View on GitHub</a>
+        </div>
+      </div>
+      <figure class="hero-art">
+        <img src="assets/evidence-fold.png" width="1536" height="1024" alt="Layered evidence fragments connected to one resolved profile">
+      </figure>
+    </div>
+
+    <div class="shell principles" aria-label="Core principles">
+      <div class="principle"><strong>Provider neutral</strong><span>Bring approved search, public data, browser, or internal sources.</span></div>
+      <div class="principle"><strong>Evidence intact</strong><span>Keep URL, observation time, provider, and confidence with every claim.</span></div>
+      <div class="principle"><strong>Review explicit</strong><span>Surface conflicts and inferred claims before automated action.</span></div>
+    </div>
+
+    <section id="why">
+      <div class="shell section-grid">
+        <div class="section-copy">
+          <p class="eyebrow">Provenance first</p>
+          <h2>Every field keeps its proof.</h2>
+          <p>Enrichfold turns provider output into deterministic decisions while preserving what was observed, where, and when.</p>
+        </div>
+        <div class="proof-list">
+          <article class="proof-item">
+            <span class="proof-index">01</span>
+            <div><h3>Collect claims, not mystery objects</h3><p>Values arrive with typed evidence, source URLs, confidence, and provider identity.</p></div>
+          </article>
+          <article class="proof-item">
+            <span class="proof-index">02</span>
+            <div><h3>Reconcile deterministically</h3><p>Stable rules select a suggested value and preserve every competing claim.</p></div>
+          </article>
+          <article class="proof-item">
+            <span class="proof-index">03</span>
+            <div><h3>Gate uncertain results</h3><p>Conflicts and inferred claims are marked for review instead of silently passing.</p></div>
+          </article>
+          <article class="proof-item">
+            <span class="proof-index">04</span>
+            <div><h3>Control research cost</h3><p>Reserve provider units before execution and expose partial coverage when work is skipped or fails.</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="keenable" id="keenable">
+      <div class="shell section-grid">
+        <div class="section-copy">
+          <p class="eyebrow">Keenable connected</p>
+          <h2>Search broadly. Decide carefully.</h2>
+          <p>The optional Keenable adapter discovers sources. Your mapper decides which results become claims, so search output never masquerades as verified fact.</p>
+        </div>
+        <div class="code-card">
+          <div class="code-head"><span>provider.py</span><button class="copy-button" type="button" data-copy="provider-code">Copy</button></div>
+          <pre id="provider-code"><code><span class="kw">from</span> enrichfold <span class="kw">import</span> (
+    Claim, Entity, Evidence, KeenableProvider,
+    ProviderSpec, ResearchEngine,
+)
+
+<span class="kw">def</span> map_results(entity, results):
+    <span class="kw">for</span> item <span class="kw">in</span> results:
+        <span class="kw">yield</span> Claim(
+            field=<span class="str">"summary"</span>,
+            value=item[<span class="str">"description"</span>],
+            kind=<span class="str">"inferred"</span>,
+            evidence=Evidence(
+                source_url=item[<span class="str">"url"</span>],
+                observed_at=item[<span class="str">"acquired_at"</span>],
+                confidence=0.8,
+                provider=<span class="str">"keenable"</span>,
+            ),
+        )
+
+provider = KeenableProvider(
+    <span class="kw">lambda</span> entity: f<span class="str">'{entity.identifiers["domain"]} company'</span>,
+    map_results,
+)
+
+result = ResearchEngine([
+    ProviderSpec(<span class="str">"keenable"</span>, provider, reserved_units=1),
+]).run(Entity.company(domain=<span class="str">"example.com"</span>))</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="quickstart">
+      <div class="shell quickstart">
+        <div>
+          <p class="eyebrow">Get started</p>
+          <h2>Add provenance to your enrichment pipeline.</h2>
+          <p>Install the Python package, connect the providers you trust, and keep review decisions in your application.</p>
+        </div>
+        <div class="actions">
+          <a class="button primary" href="https://pypi.org/project/enrichfold/">pip install enrichfold</a>
+          <a class="button" href="https://github.com/Mihailorama/enrichfold#readme">Read the docs</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell">
+    <span>Enrichfold is MIT licensed.</span>
+    <span><a href="https://pypi.org/project/enrichfold/">PyPI</a> &nbsp; <a href="https://www.npmjs.com/package/@mihailorama/enrichfold">npm</a> &nbsp; <a href="https://github.com/Mihailorama/enrichfold">Source</a></span>
+  </footer>
+
+  <script>
+    document.querySelectorAll('[data-copy]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(document.getElementById(button.dataset.copy).innerText);
+        button.textContent = 'Copied';
+        setTimeout(() => { button.textContent = 'Copy'; }, 1600);
+      });
+    });
+  </script>
+</body>
+</html>

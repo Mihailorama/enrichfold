@@ -17,7 +17,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Mihailorama/enrichfold"
+Homepage = "https://mihailorama.github.io/enrichfold/"
 Repository = "https://github.com/Mihailorama/enrichfold"
 Issues = "https://github.com/Mihailorama/enrichfold/issues"
 

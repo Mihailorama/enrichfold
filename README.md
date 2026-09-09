@@ -2,6 +2,8 @@
 
 Provider-neutral, provenance-first entity enrichment for people and companies.
 
+[Website](https://mihailorama.github.io/enrichfold/) · [PyPI](https://pypi.org/project/enrichfold/) · [npm](https://www.npmjs.com/package/@mihailorama/enrichfold)
+
 `enrichfold` is an offline-first core, not a scraping product: applications supply
 their own discovery providers and credentials. An optional Keenable adapter provides
 web search when explicitly configured. Every accepted attribute retains its source
