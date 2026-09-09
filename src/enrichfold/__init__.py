@@ -12,6 +12,7 @@ from .identity import (
     is_free_email_domain,
     is_generic_company_name,
 )
+from .keenable import KeenableProvider
 from .models import (
     Claim,
     EnrichmentResult,
@@ -49,6 +50,7 @@ __all__ = [
     "EvidenceValidator",
     "EvidenceVerdict",
     "FieldResolution",
+    "KeenableProvider",
     "ProviderOutput",
     "ProviderRun",
     "ProviderSpec",

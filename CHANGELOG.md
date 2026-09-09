@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 — 2026-09-09
+
+- Add `KeenableProvider`, a synchronous Keenable web-search adapter for
+  `ResearchEngine` that reads `KEENABLE_API_KEY` or an explicit key.
+- Keep claim extraction caller-owned so search snippets cannot silently become
+  accepted enrichment facts.
+- Add end-to-end provider coverage and live validation against the Keenable API.
+
 ## 0.3.0 — 2026-08-20
 
 - Add `ResearchEngine`: concurrent, provider-neutral research orchestration

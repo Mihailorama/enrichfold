@@ -3,9 +3,10 @@
 Provider-neutral, provenance-first entity enrichment for people and companies.
 
 `enrichfold` is an offline-first core, not a scraping product: applications supply
-their own discovery providers and credentials. Every accepted attribute retains its
-source URL, observation time, and confidence, so downstream systems can decide
-whether a result is suitable for an automated action or requires review.
+their own discovery providers and credentials. An optional Keenable adapter provides
+web search when explicitly configured. Every accepted attribute retains its source
+URL, observation time, and confidence, so downstream systems can decide whether a
+result is suitable for an automated action or requires review.
 
 ```python
 from enrichfold import Entity, EnrichmentPipeline, Evidence
@@ -111,6 +112,46 @@ reason)` for a weak source or `EvidenceVerdict("rejected", reason)` to keep
 it out of resolution. In either case, the result preserves the original claim,
 source URL, and verdict in `evidence_assessments`.
 
+## Keenable search provider
+
+`KeenableProvider` uses the same REST search contract as Scrapefold's Keenable
+engine. It reads `KEENABLE_API_KEY` by default and performs one search per entity.
+Because search results are sources rather than verified attributes, the caller maps
+them to claims explicitly:
+
+```python
+from enrichfold import (
+    Claim,
+    Entity,
+    Evidence,
+    KeenableProvider,
+    ProviderSpec,
+    ResearchEngine,
+)
+
+def claims(entity, results):
+    for result in results:
+        yield Claim(
+            field="summary",
+            value=result["description"],
+            kind="inferred",
+            evidence=Evidence(
+                source_url=result["url"],
+                observed_at=result["acquired_at"],
+                confidence=0.8,
+                provider="keenable",
+            ),
+        )
+
+provider = KeenableProvider(
+    lambda entity: f'{entity.identifiers["domain"]} company',
+    claims,
+)
+result = ResearchEngine([
+    ProviderSpec("keenable", provider, reserved_units=1),
+]).run(Entity.company(domain="example.com"), requested_fields=("summary",))
+```
+
 ## Company identity gate
 
 Before a caller enriches or acts on a company, use the offline identity gate.
@@ -134,7 +175,8 @@ assert identity.canonical_domain == "acme.example"
 
 ## Design boundaries
 
-- No network calls, scraping, credential handling, contact exporting, or outreach.
+- Core reconciliation and identity APIs make no network calls; explicit provider
+  adapters such as `KeenableProvider` may do so.
 - No inferred facts: a field is returned only when a provider supplies evidence.
 - Conflicts have a deterministic suggested value but are marked `needs_review`.
 - Inferred claims are always marked `needs_review`.
@@ -148,8 +190,8 @@ assert identity.canonical_domain == "acme.example"
   internal approved sources.
 
 The package intentionally does not decide whether a review is approved or run
-an action after one; persistence, permissions, UI, and provider adapters stay
-with the host application.
+an action after one; persistence, permissions, UI, and provider-specific claim
+extraction stay with the host application.
 
 ## Installation
 
