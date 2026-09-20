@@ -154,6 +154,50 @@ result = ResearchEngine([
 ]).run(Entity.company(domain="example.com"), requested_fields=("summary",))
 ```
 
+## Grounding validator
+
+`GroundingValidator` is an optional `EvidenceValidator` that checks a
+provider-asserted value against the actual text of its own source page. The
+default engine behaviour is to trust provider values (the verdict is literally
+`accepted, "no validator configured"`); this adapter closes that gap.
+
+It is a standalone, opt-in adapter like `KeenableProvider`: enrichfold's core
+never imports it and never gains an HTTP client. The adapter does I/O only
+through a caller-supplied `fetch(url) -> str` callable, so "core never fetches"
+stays true. Wire in a Scrapefold-backed fetch (or any other):
+
+```python
+from enrichfold import GroundingValidator, ProviderSpec, ResearchEngine, Entity
+import scrapefold  # host dependency, not enrichfold's
+
+validator = GroundingValidator(lambda url: scrapefold.scrape_sync(url).text)
+
+result = ResearchEngine(
+    [ProviderSpec("official-site", official_site, reserved_units=2)],
+    evidence_validator=validator,
+).run(Entity.company(domain="example.com"), requested_fields=("industry",))
+```
+
+For each claim the validator fetches `claim.evidence.source_url` and grounds
+`claim.value` (and any `evidence.attributes` values) in the returned text:
+
+- `accepted` when the value is found (coverage reaches `min_accept_coverage`,
+  all values by default).
+- `rejected` when no value is found - it is kept out of resolution.
+- `needs_review` when only some values are found, when there is no groundable
+  value, or when the fetch fails. A fetch failure never raises: it becomes a
+  review verdict with a redacted reason.
+
+The adapter adds no claims - it only returns a verdict, so it "must not perform
+hidden enrichment" holds. As with any validator, the original claim, source
+URL, and verdict are preserved in `evidence_assessments`.
+
+The matching is done by `find_citations(text, targets)`, a stdlib-only,
+two-pass exact-then-normalized substring matcher returning coverage. It is a
+port of Scrapefold's citation algorithm, kept inside this adapter rather than
+imported so enrichfold has no dependency on Scrapefold and stays
+offline-testable.
+
 ## Company identity gate
 
 Before a caller enriches or acts on a company, use the offline identity gate.
@@ -185,7 +229,9 @@ assert identity.canonical_domain == "acme.example"
 - Multi-provider runs reserve caller-defined generic units before execution and
   expose partial coverage rather than hiding failed or skipped providers.
 - Optional source-policy hooks can accept, reject, or route evidence to review;
-  the package never fetches or validates URLs on its own.
+  the package never fetches or validates URLs on its own. The optional
+  `GroundingValidator` adapter does so only through a caller-supplied fetch
+  callable, never a built-in HTTP client.
 - Company identity is verified only through an exact name/domain match or
   caller-supplied, independently verified same-domain site metadata.
 - Bring your own providers for search engines, public data APIs, browser tools, or

@@ -1,5 +1,6 @@
 """Provider-neutral, provenance-first entity enrichment."""
 
+from .grounding import CitationCoverage, GroundingValidator, find_citations
 from .identity import (
     DEFAULT_FREE_EMAIL_DOMAINS,
     DEFAULT_GENERIC_COMPANY_NAMES,
@@ -39,6 +40,7 @@ from .research import (
 __all__ = [
     "DEFAULT_FREE_EMAIL_DOMAINS",
     "DEFAULT_GENERIC_COMPANY_NAMES",
+    "CitationCoverage",
     "Claim",
     "CompanyIdentity",
     "DiscoveryProvider",
@@ -50,6 +52,7 @@ __all__ = [
     "EvidenceValidator",
     "EvidenceVerdict",
     "FieldResolution",
+    "GroundingValidator",
     "KeenableProvider",
     "ProviderOutput",
     "ProviderRun",
@@ -65,6 +68,7 @@ __all__ = [
     "company_email_domain",
     "company_name_matches_domain",
     "derive_company_identity",
+    "find_citations",
     "is_free_email_domain",
     "is_generic_company_name",
     "reconcile_claims",
