@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0 — 2026-09-20
+
+- Add `GroundingValidator`, an optional `EvidenceValidator` adapter that grounds
+  a provider-asserted claim value (and its evidence attribute values) against
+  the text of its own `source_url`, fetched through a caller-supplied
+  `fetch(url) -> str` callable. Enrichfold's core still makes no network calls
+  and gains no HTTP client.
+- Add `find_citations`, a stdlib-only two-pass exact-then-normalized substring
+  matcher returning coverage; a port of Scrapefold's citation algorithm vendored
+  into the adapter so enrichfold keeps no dependency on Scrapefold.
+- Verdicts preserve provenance: `accepted` when the value is grounded,
+  `rejected` when absent, and `needs_review` on partial coverage, an
+  ungroundable value, or a fetch failure (fetch errors never propagate).
+
 ## 0.4.0 — 2026-09-09
 
 - Add `KeenableProvider`, a synchronous Keenable web-search adapter for
