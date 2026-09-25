@@ -1,12 +1,16 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 — 2026-09-25
 
-- Added optional multi-engine web search with Exa, Parallel, You.com, Tavily,
-  Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, and DuckDuckGo, plus a research
-  adapter that maps search results to evidence-backed claims.
+- Add optional multi-engine web search with Exa, Parallel, You.com, Tavily,
+  Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, and DuckDuckGo.
+- Add `WebSearchProvider` to map search sources to provenance-bearing claims.
+- Add optional `ScrapefoldScrapeProvider` for page-backed research. Scrapefold
+  now delegates its public `search()` API to Enrichfold.
+- Include the previously unreleased `GroundingValidator` and `find_citations`
+  additions described below.
 
-## 0.5.0 — 2026-09-20
+### Grounding changes prepared as 0.5.0 (not published separately)
 
 - Add `GroundingValidator`, an optional `EvidenceValidator` adapter that grounds
   a provider-asserted claim value (and its evidence attribute values) against

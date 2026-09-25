@@ -114,13 +114,13 @@
     h1 {
       max-width: 720px;
       margin-bottom: 26px;
-      font-size: clamp(3.3rem, 6vw, 5.8rem);
+      font-size: clamp(3.3rem, 5vw, 5rem);
       line-height: .93;
       letter-spacing: -.072em;
       text-wrap: balance;
     }
 
-    .hero-line { display: block; white-space: nowrap; }
+    .hero-line { display: block; }
 
     .hero-copy > p:not(.eyebrow) {
       max-width: 560px;
@@ -378,6 +378,7 @@
     </a>
     <nav aria-label="Primary navigation">
       <a href="#why">Why Enrichfold</a>
+      <a href="#search">Search</a>
       <a href="#keenable">Keenable</a>
       <a href="#quickstart">Install</a>
       <a href="https://github.com/Mihailorama/enrichfold">GitHub</a>
@@ -387,7 +388,7 @@
   <main id="top">
     <div class="shell hero">
       <div class="hero-copy">
-        <p class="eyebrow">Open-source entity enrichment</p>
+        <p class="eyebrow">Open-source entity enrichment · v0.6.0</p>
         <h1><span class="hero-line">Enrichment</span><span class="hero-line">you can audit.</span></h1>
         <p>Resolve people and companies without losing the source behind each field.</p>
         <div class="actions">
@@ -430,6 +431,29 @@
             <span class="proof-index">04</span>
             <div><h3>Control research cost</h3><p>Reserve provider units before execution and expose partial coverage when work is skipped or fails.</p></div>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="keenable" id="search">
+      <div class="shell section-grid">
+        <div class="section-copy">
+          <p class="eyebrow">Search connected</p>
+          <h2>Find sources across 11 search engines.</h2>
+          <p>Enrichfold searches Exa, Parallel, You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, and DuckDuckGo. It merges duplicate URLs with explainable scores. <a href="https://scrapefold.com/">Scrapefold</a> calls the same search API and handles page retrieval by URL.</p>
+          <p>Search results remain sources. Use <code>WebSearchProvider</code> to map them into claims with evidence, then let <code>ResearchEngine</code> apply its review gates.</p>
+        </div>
+        <div class="code-card">
+          <div class="code-head"><span>search.py</span><button class="copy-button" type="button" data-copy="search-code">Copy</button></div>
+          <pre id="search-code"><code><span class="kw">from</span> enrichfold.search <span class="kw">import</span> SearchOptions, search
+
+results = <span class="kw">await</span> search(
+    <span class="str">"example.com company"</span>,
+    SearchOptions(engines=(<span class="str">"parallel"</span>, <span class="str">"tavily"</span>)),
+)
+
+<span class="kw">for</span> result <span class="kw">in</span> results:
+    print(result.url, result.score, result.engines)</code></pre>
         </div>
       </div>
     </section>
@@ -482,7 +506,7 @@ result = ResearchEngine([
           <p>Install the Python package, connect the providers you trust, and keep review decisions in your application.</p>
         </div>
         <div class="actions">
-          <a class="button primary" href="https://pypi.org/project/enrichfold/">pip install enrichfold</a>
+          <a class="button primary" href="https://pypi.org/project/enrichfold/">pip install 'enrichfold[search]'</a>
           <a class="button" href="https://github.com/Mihailorama/enrichfold#readme">Read the docs</a>
         </div>
       </div>

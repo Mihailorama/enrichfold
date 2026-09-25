@@ -6,8 +6,9 @@ Provider-neutral, provenance-first entity enrichment for people and companies.
 
 `enrichfold` has an offline-first enrichment core and an optional web search
 package. Applications supply credentials. Search engines include Exa, Parallel,
-You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, and DuckDuckGo. An
-optional Keenable research adapter is also available. Every accepted attribute retains its source
+You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, and
+DuckDuckGo. Optional Keenable and Scrapefold page adapters are also available.
+Every accepted attribute retains its source
 URL, observation time, and confidence, so downstream systems can decide whether a
 result is suitable for an automated action or requires review.
 
@@ -260,14 +261,13 @@ assert identity.canonical_domain == "acme.example"
 - Inferred claims are always marked `needs_review`.
 - Multi-provider runs reserve caller-defined generic units before execution and
   expose partial coverage rather than hiding failed or skipped providers.
-- Optional source-policy hooks can accept, reject, or route evidence to review;
-  the package never fetches or validates URLs on its own. The optional
-  `GroundingValidator` adapter does so only through a caller-supplied fetch
-  callable, never a built-in HTTP client.
+- Optional source-policy hooks can accept, reject, or route evidence to review.
+  `GroundingValidator` uses only a caller-supplied fetch callable; the optional
+  search package performs network calls only when explicitly invoked.
 - Company identity is verified only through an exact name/domain match or
   caller-supplied, independently verified same-domain site metadata.
-- Bring your own providers for search engines, public data APIs, browser tools, or
-  internal approved sources.
+- Built-in search adapters and caller-owned providers can be combined with public
+  data APIs, browser tools, or internal approved sources.
 
 The package intentionally does not decide whether a review is approved or run
 an action after one; persistence, permissions, UI, and provider-specific claim
@@ -279,6 +279,8 @@ extraction stay with the host application.
 
 ```bash
 pip install enrichfold
+# For direct web search:
+pip install 'enrichfold[search]'
 ```
 
 ### TypeScript / Node.js
