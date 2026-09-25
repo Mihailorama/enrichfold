@@ -36,6 +36,8 @@ from .research import (
     ResearchProvider,
     ResearchResult,
 )
+from .scrapefold import ScrapefoldScrapeProvider
+from .search.provider import WebSearchProvider
 
 __all__ = [
     "DEFAULT_FREE_EMAIL_DOMAINS",
@@ -63,7 +65,9 @@ __all__ = [
     "ResearchProvider",
     "ResearchResult",
     "ResolvedAttribute",
+    "ScrapefoldScrapeProvider",
     "SiteIdentity",
+    "WebSearchProvider",
     "canonical_website_domain",
     "company_email_domain",
     "company_name_matches_domain",

@@ -4,9 +4,10 @@ Provider-neutral, provenance-first entity enrichment for people and companies.
 
 [Website](https://mihailorama.github.io/enrichfold/) · [PyPI](https://pypi.org/project/enrichfold/) · [npm](https://www.npmjs.com/package/@mihailorama/enrichfold)
 
-`enrichfold` is an offline-first core, not a scraping product: applications supply
-their own discovery providers and credentials. An optional Keenable adapter provides
-web search when explicitly configured. Every accepted attribute retains its source
+`enrichfold` has an offline-first enrichment core and an optional web search
+package. Applications supply credentials. Search engines include Exa, Parallel,
+You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, and DuckDuckGo. An
+optional Keenable research adapter is also available. Every accepted attribute retains its source
 URL, observation time, and confidence, so downstream systems can decide whether a
 result is suitable for an automated action or requires review.
 
@@ -29,7 +30,7 @@ print(result.attributes["industry"].value)  # software
 
 ## Evidence, conflicts, and review gates
 
-`enrichfold` keeps provider I/O outside the library. Its core turns supplied
+The core keeps provider I/O in adapters. It turns supplied
 evidence into deterministic decisions while retaining disagreements for a human
 approval flow. A conflicting value is never silently accepted:
 
@@ -153,6 +154,37 @@ result = ResearchEngine([
     ProviderSpec("keenable", provider, reserved_units=1),
 ]).run(Entity.company(domain="example.com"), requested_fields=("summary",))
 ```
+
+## Web search and Scrapefold pages
+
+Install `enrichfold[search]` for direct search. Scrapefold's `search()` delegates
+to this API; its URL engines fetch pages. The caller decides which results
+substantiate claims:
+
+```python
+from enrichfold import ScrapefoldScrapeProvider, WebSearchProvider
+from enrichfold.search import SearchOptions, search
+
+# await search("example.com company", SearchOptions(engines=("parallel", "tavily")))
+provider = WebSearchProvider(
+    query=lambda entity: f'{entity.identifiers["domain"]} company',
+    map_results=claims,  # same (entity, results) mapper as KeenableProvider
+    engines=("parallel", "tavily"),
+    usage_units=2,
+)
+
+page_provider = ScrapefoldScrapeProvider(
+    url=lambda entity: f'https://{entity.identifiers["domain"]}/about',
+    map_result=map_page,  # (entity, page) -> claims
+    engines=("firecrawl",),
+    usage_units=1,
+)
+```
+
+Each result passed to `map_results` has `url`, `title`, `description`,
+`engines`, and `acquired_at`. Pass `usage_units` and reserve at least that many
+units in its `ProviderSpec` when enforcing a research budget. The page mapper
+receives `url`, `text`, `markdown`, `html`, `json`, `engine`, and `acquired_at`.
 
 ## Grounding validator
 

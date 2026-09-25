@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Added optional multi-engine web search with Exa, Parallel, You.com, Tavily,
+  Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, and DuckDuckGo, plus a research
+  adapter that maps search results to evidence-backed claims.
+
 ## 0.5.0 — 2026-09-20
 
 - Add `GroundingValidator`, an optional `EvidenceValidator` adapter that grounds
