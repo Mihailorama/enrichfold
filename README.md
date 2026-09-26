@@ -7,7 +7,7 @@ Provider-neutral, provenance-first entity enrichment for people and companies.
 `enrichfold` has an offline-first enrichment core and an optional web search
 package. Applications supply credentials. Search engines include Exa, Parallel,
 You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, and
-DuckDuckGo. Optional Keenable and Scrapefold page adapters are also available.
+DuckDuckGo, and Treg. Optional Keenable, Treg catalog, and Scrapefold page adapters are also available.
 Every accepted attribute retains its source
 URL, observation time, and confidence, so downstream systems can decide whether a
 result is suitable for an automated action or requires review.
@@ -186,6 +186,58 @@ Each result passed to `map_results` has `url`, `title`, `description`,
 `engines`, and `acquired_at`. Pass `usage_units` and reserve at least that many
 units in its `ProviderSpec` when enforcing a research budget. The page mapper
 receives `url`, `text`, `markdown`, `html`, `json`, `engine`, and `acquired_at`.
+
+## Treg: people, companies, and other catalog sources
+
+Install `enrichfold[treg]` (or `enrichfold[search]`) and supply `TREG_TOKEN`.
+`TregClient` calls JSON endpoints from the [live catalog](https://treg.to/catalog).
+It preserves the provider's response and returns the billed cost, call ID,
+and serving provider from Treg's headers:
+
+```python
+from enrichfold import TregClient
+
+response = await TregClient().call(
+    "treg.people.search",
+    request={"company_domain": "example.com", "title": "CTO", "limit": 5},
+    max_cost_usd=0.05,
+    timeout_s=90,
+)
+people = response.data["output"]["people"]
+print(people, response.cost_usd, response.served_by)
+```
+
+Use `TregProvider` to put a catalog source into `ResearchEngine`:
+
+```python
+from enrichfold import TregProvider
+
+provider = TregProvider(
+    "treg.people.search",
+    request=lambda entity: {"company_domain": entity.identifiers["domain"], "limit": 5},
+    map_response=map_people,  # (entity, original JSON) -> evidence-backed claims
+    max_cost_usd=0.05,
+    usage_units=1,
+)
+# ProviderSpec("treg-people", provider, reserved_units=1)
+```
+
+The same adapter accepts company enrichment, email lookup, SEO, and social
+JSON endpoints: choose the endpoint ID and its native request from the catalog.
+For GET endpoints, `request` becomes query parameters; `params` also supports
+query parameters alongside a POST body. Identity tokens require `org=` or
+`TREG_ORG`; organization tokens need only `TREG_TOKEN`.
+
+People rows remain provider-specific, and the response may name ignored
+filters in `_treg`. The mapper owns claim selection and source URLs.
+`ProviderRun.metadata` retains the endpoint, call ID, upstream provider, and
+actual cost. `usage_units` remains the research engine's generic budget unit;
+`max_cost_usd` is the separate server-enforced dollar ceiling (default $1).
+HTTP 202 pending tasks report their call ID and are not resubmitted or polled
+automatically. Binary media endpoints are outside this JSON adapter.
+
+For ordinary web search, use `SearchOptions(engines=("treg",))`, which calls
+`treg.web.search`. Scrapefold handles URL retrieval with `treg.web.extract`.
 
 ## Grounding validator
 

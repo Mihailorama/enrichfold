@@ -14,6 +14,11 @@ if TYPE_CHECKING:
 
 # Lazy registry: name -> import-and-return-class function.
 _REGISTRY: dict[str, Callable[[], type[SearchEngine]]] = {
+    "treg": lambda: (
+        __import__(
+            "enrichfold.search.engines.treg_search", fromlist=["TregSearchEngine"]
+        ).TregSearchEngine
+    ),
     "browserbase": lambda: (
         __import__(
             "enrichfold.search.engines.browserbase_search",

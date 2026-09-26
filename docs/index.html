@@ -379,6 +379,7 @@
     <nav aria-label="Primary navigation">
       <a href="#why">Why Enrichfold</a>
       <a href="#search">Search</a>
+      <a href="#treg">Treg</a>
       <a href="#keenable">Keenable</a>
       <a href="#quickstart">Install</a>
       <a href="https://github.com/Mihailorama/enrichfold">GitHub</a>
@@ -388,7 +389,7 @@
   <main id="top">
     <div class="shell hero">
       <div class="hero-copy">
-        <p class="eyebrow">Open-source entity enrichment · v0.6.0</p>
+        <p class="eyebrow">Open-source entity enrichment · v0.7.0</p>
         <h1><span class="hero-line">Enrichment</span><span class="hero-line">you can audit.</span></h1>
         <p>Resolve people and companies without losing the source behind each field.</p>
         <div class="actions">
@@ -439,8 +440,8 @@
       <div class="shell section-grid">
         <div class="section-copy">
           <p class="eyebrow">Search connected</p>
-          <h2>Find sources across 11 search engines.</h2>
-          <p>Enrichfold searches Exa, Parallel, You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, and DuckDuckGo. It merges duplicate URLs with explainable scores. <a href="https://scrapefold.com/">Scrapefold</a> calls the same search API and handles page retrieval by URL.</p>
+          <h2>Find sources across 12 search engines.</h2>
+          <p>Enrichfold searches Exa, Parallel, You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, DuckDuckGo, and Treg. It merges duplicate URLs with explainable scores. <a href="https://scrapefold.com/">Scrapefold</a> calls the same search API and handles page retrieval by URL.</p>
           <p>Search results remain sources. Use <code>WebSearchProvider</code> to map them into claims with evidence, then let <code>ResearchEngine</code> apply its review gates.</p>
         </div>
         <div class="code-card">
@@ -454,6 +455,34 @@ results = <span class="kw">await</span> search(
 
 <span class="kw">for</span> result <span class="kw">in</span> results:
     print(result.url, result.score, result.engines)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="keenable" id="treg">
+      <div class="shell section-grid">
+        <div class="section-copy">
+          <p class="eyebrow">Treg connected</p>
+          <h2>People search and more catalog sources.</h2>
+          <p>Use <a href="https://treg.to/catalog">Treg's catalog</a> for people search, company enrichment, email lookup, SEO, and social data through one token. <code>TregClient</code> preserves the original JSON, serving provider, call ID, and actual cost.</p>
+          <p><code>TregProvider</code> brings a selected endpoint into your research pipeline. Your mapper chooses evidence-backed claims. Set a dollar ceiling for each call; provider run metadata keeps the receipt.</p>
+        </div>
+        <div class="code-card">
+          <div class="code-head"><span>people.py</span><button class="copy-button" type="button" data-copy="treg-code">Copy</button></div>
+          <pre id="treg-code"><code><span class="kw">from</span> enrichfold <span class="kw">import</span> TregClient
+
+<span class="comment"># Reads TREG_TOKEN; install enrichfold[treg]</span>
+response = <span class="kw">await</span> TregClient().call(
+    <span class="str">"treg.people.search"</span>,
+    request={
+        <span class="str">"company_domain"</span>: <span class="str">"example.com"</span>,
+        <span class="str">"title"</span>: <span class="str">"CTO"</span>,
+        <span class="str">"limit"</span>: 5,
+    },
+    max_cost_usd=0.05,
+    timeout_s=90,
+)
+people = response.data[<span class="str">"output"</span>][<span class="str">"people"</span>]</code></pre>
         </div>
       </div>
     </section>

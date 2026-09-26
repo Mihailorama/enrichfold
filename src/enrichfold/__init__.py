@@ -38,6 +38,7 @@ from .research import (
 )
 from .scrapefold import ScrapefoldScrapeProvider
 from .search.provider import WebSearchProvider
+from .treg import TregClient, TregProvider, TregResponse
 
 __all__ = [
     "DEFAULT_FREE_EMAIL_DOMAINS",
@@ -67,6 +68,9 @@ __all__ = [
     "ResolvedAttribute",
     "ScrapefoldScrapeProvider",
     "SiteIdentity",
+    "TregClient",
+    "TregProvider",
+    "TregResponse",
     "WebSearchProvider",
     "canonical_website_domain",
     "company_email_domain",

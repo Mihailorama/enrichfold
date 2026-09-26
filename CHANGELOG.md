@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.0 — 2026-09-26
+
+- Add `TregClient` for JSON catalog calls with token/org authentication, a
+  per-call spending ceiling, and actual cost/call/provider metadata.
+- Add `TregProvider` for People search, company enrichment, email lookup,
+  and other catalog sources. Applications explicitly map responses to claims.
+- Add `treg` web search via `treg.web.search`; Scrapefold uses this same API.
+- Report pending async calls without automatically resubmitting paid tasks.
+- Preserve provider metadata in research runs, including Treg call receipts.
+
 ## 0.6.0 — 2026-09-25
 
 - Add optional multi-engine web search with Exa, Parallel, You.com, Tavily,

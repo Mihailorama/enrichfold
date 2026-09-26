@@ -120,6 +120,7 @@ class ProviderRun:
     used_units: float = 0.0
     claims: tuple[Claim, ...] = ()
     error: str | None = None
+    metadata: Mapping[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -235,6 +236,7 @@ class ResearchEngine:
                         reserved_units=spec.reserved_units,
                         used_units=output.usage_units,
                         claims=cast(tuple[Claim, ...], output.claims),
+                        metadata=output.metadata,
                     )
 
         ordered_runs = tuple(runs[spec.name] for spec in self._providers)
