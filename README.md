@@ -6,7 +6,7 @@ Provider-neutral, provenance-first entity enrichment for people and companies.
 
 `enrichfold` has an offline-first enrichment core and an optional web search
 package. Applications supply credentials. Search engines include Exa, Parallel,
-You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, and
+You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, Keenable,
 DuckDuckGo, and Treg. Optional Keenable, Treg catalog, and Scrapefold page adapters are also available.
 Every accepted attribute retains its source
 URL, observation time, and confidence, so downstream systems can decide whether a
@@ -137,7 +137,7 @@ def claims(entity, results):
     for result in results:
         yield Claim(
             field="summary",
-            value=result["description"],
+            value=result["snippet"],
             kind="inferred",
             evidence=Evidence(
                 source_url=result["url"],
@@ -167,6 +167,10 @@ from enrichfold import ScrapefoldScrapeProvider, WebSearchProvider
 from enrichfold.search import SearchOptions, search
 
 # await search("example.com company", SearchOptions(engines=("parallel", "tavily")))
+# Keenable reads KEENABLE_API_KEY (keyless public tier when selected without one);
+# filters pass through `extra`, and each hit's `raw` keeps published_at/acquired_at:
+# await search("annual report", SearchOptions(engines=("keenable",),
+#     extra={"keenable_site": "sec.gov", "keenable_published_after": "1y"}))
 provider = WebSearchProvider(
     query=lambda entity: f'{entity.identifiers["domain"]} company',
     map_results=claims,  # same (entity, results) mapper as KeenableProvider
