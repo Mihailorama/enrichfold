@@ -72,6 +72,12 @@ _REGISTRY: dict[str, Callable[[], type[SearchEngine]]] = {
             "enrichfold.search.engines.nimble_search", fromlist=["NimbleSearchEngine"]
         ).NimbleSearchEngine
     ),
+    "keenable": lambda: (
+        __import__(
+            "enrichfold.search.engines.keenable_search",
+            fromlist=["KeenableSearchEngine"],
+        ).KeenableSearchEngine
+    ),
     "duckduckgo": lambda: (
         __import__(
             "enrichfold.search.engines.duckduckgo", fromlist=["DuckDuckGoSearchEngine"]

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.0 — 2026-11-12
+
+- Add the `keenable` web search engine (`KEENABLE_API_KEY`; keyless public
+  endpoint when selected explicitly without a key). Site, excluded-domain,
+  publish-date and index-date filters pass through `keenable_*` extras; hits
+  keep `published_at` and `acquired_at` in `raw`.
+- Fix the `KeenableProvider` README example to read `snippet`; Keenable's
+  `description` field is deprecated and always empty.
+
 ## 0.7.0 — 2026-09-26
 
 - Add `TregClient` for JSON catalog calls with token/org authentication, a
