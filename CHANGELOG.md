@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.8.0 — 2026-11-12
 
 - Add the `keenable` web search engine (`KEENABLE_API_KEY`; keyless public
   endpoint when selected explicitly without a key). Site, excluded-domain,
