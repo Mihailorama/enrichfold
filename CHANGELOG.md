@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.0 — 2026-11-14
+
 - Add SERP engines ported from ai-utils: `jina` (s.jina.ai), `serpapi_google`,
   `serpapi_yandex`, `scrapingdog` and `outscraper` (google-search-v3), with
   ai-utils' request parameters.
@@ -10,6 +12,9 @@
   (Responses `web_search`) and `OpenRouterAnswerEngine` (`:online`). The model
   is required and the provider call is injectable.
 - Add `scripts/parity_ai_utils.py`, a live comparison with ai-utils' output.
+- Vendor HTTP errors raise with the status and the start of the body, never the
+  request URL, so API keys stay out of exceptions and logs. Importing the search
+  engines masks `api_key=` values in the `httpx` logger's request lines.
 
 ## 0.8.0 — 2026-11-12
 
