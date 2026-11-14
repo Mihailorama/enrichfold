@@ -78,6 +78,35 @@ _REGISTRY: dict[str, Callable[[], type[SearchEngine]]] = {
             fromlist=["KeenableSearchEngine"],
         ).KeenableSearchEngine
     ),
+    "jina": lambda: (
+        __import__(
+            "enrichfold.search.engines.jina_search", fromlist=["JinaSearchEngine"]
+        ).JinaSearchEngine
+    ),
+    "serpapi_google": lambda: (
+        __import__(
+            "enrichfold.search.engines.serpapi_search",
+            fromlist=["SerpApiGoogleSearchEngine"],
+        ).SerpApiGoogleSearchEngine
+    ),
+    "serpapi_yandex": lambda: (
+        __import__(
+            "enrichfold.search.engines.serpapi_search",
+            fromlist=["SerpApiYandexSearchEngine"],
+        ).SerpApiYandexSearchEngine
+    ),
+    "scrapingdog": lambda: (
+        __import__(
+            "enrichfold.search.engines.scrapingdog_search",
+            fromlist=["ScrapingdogSearchEngine"],
+        ).ScrapingdogSearchEngine
+    ),
+    "outscraper": lambda: (
+        __import__(
+            "enrichfold.search.engines.outscraper_search",
+            fromlist=["OutscraperSearchEngine"],
+        ).OutscraperSearchEngine
+    ),
     "duckduckgo": lambda: (
         __import__(
             "enrichfold.search.engines.duckduckgo", fromlist=["DuckDuckGoSearchEngine"]
