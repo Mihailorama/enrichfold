@@ -7,7 +7,9 @@ Provider-neutral, provenance-first entity enrichment for people and companies.
 `enrichfold` has an offline-first enrichment core and an optional web search
 package. Applications supply credentials. Search engines include Exa, Parallel,
 You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, Keenable,
-DuckDuckGo, and Treg. Optional Keenable, Treg catalog, and Scrapefold page adapters are also available.
+Jina, SerpAPI (Google, Yandex), Scrapingdog, Outscraper, DuckDuckGo, and Treg.
+Answer engines (Perplexity, Gemini grounding, OpenAI web search, OpenRouter
+`:online`) return an answer with its citations. Optional Keenable, Treg catalog, and Scrapefold page adapters are also available.
 Every accepted attribute retains its source
 URL, observation time, and confidence, so downstream systems can decide whether a
 result is suitable for an automated action or requires review.
@@ -190,6 +192,32 @@ Each result passed to `map_results` has `url`, `title`, `description`,
 `engines`, and `acquired_at`. Pass `usage_units` and reserve at least that many
 units in its `ProviderSpec` when enforcing a research budget. The page mapper
 receives `url`, `text`, `markdown`, `html`, `json`, `engine`, and `acquired_at`.
+
+## Answer engines with citations
+
+An answer engine asks a web-grounded model and returns an `AnswerResult`:
+`text`, `citations` (each `url`, `title`, `snippet`), `engine`, `model`, and the
+vendor's `raw` reply. The model is always the caller's explicit choice. Requests
+match the ones ai-utils sends (prompts, temperature, token limits):
+
+```python
+from enrichfold.search import GeminiAnswerEngine, PerplexityAnswerEngine
+
+result = await PerplexityAnswerEngine("sonar-pro").answer("Acme Corp headquarters")
+# PERPLEXITY_API_KEY; also GeminiAnswerEngine (GEMINI_API_KEY), OpenAIAnswerEngine
+# (OPENAI_API_KEY), OpenRouterAnswerEngine (OPENROUTER_API_KEY, ":online" appended).
+
+async def call(url, body):  # your transport: keys, retries, model fallbacks
+    ...  # POST body to url, return the vendor's JSON reply
+
+result = await GeminiAnswerEngine("gemini-3.8-flash", call=call).answer("Acme Corp")
+```
+
+Gemini citations are Google's grounding redirect URLs with domain titles.
+SERP engines from ai-utils read `JINA_API_KEY`, `SERPAPI_API_KEY`,
+`SCRAPINGDOG_API_KEY` and `OUTSCRAPER_API_KEY` (ai-utils' `JINAAI_API_KEY`,
+`SERAPI_API_KEY` and `PERPLEXITYAI_API_KEY` names also work).
+`scripts/parity_ai_utils.py` compares live results with a saved ai-utils output.
 
 ## Treg: people, companies, and other catalog sources
 

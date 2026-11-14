@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Add SERP engines ported from ai-utils: `jina` (s.jina.ai), `serpapi_google`,
+  `serpapi_yandex`, `scrapingdog` and `outscraper` (google-search-v3), with
+  ai-utils' request parameters.
+- Add answer engines with citations: `PerplexityAnswerEngine`,
+  `GeminiAnswerEngine` (Google Search grounding), `OpenAIAnswerEngine`
+  (Responses `web_search`) and `OpenRouterAnswerEngine` (`:online`). The model
+  is required and the provider call is injectable.
+- Add `scripts/parity_ai_utils.py`, a live comparison with ai-utils' output.
+
 ## 0.8.0 — 2026-11-12
 
 - Add the `keenable` web search engine (`KEENABLE_API_KEY`; keyless public
