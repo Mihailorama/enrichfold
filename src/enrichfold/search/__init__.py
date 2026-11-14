@@ -8,6 +8,15 @@ query in, ranked results out.
 
 from __future__ import annotations
 
+from enrichfold.search.answer import (
+    AnswerEngine,
+    AnswerResult,
+    Citation,
+    GeminiAnswerEngine,
+    OpenAIAnswerEngine,
+    OpenRouterAnswerEngine,
+    PerplexityAnswerEngine,
+)
 from enrichfold.search.api import search
 from enrichfold.search.engines import get_search_engine, list_search_engine_names
 from enrichfold.search.engines.base import SearchEngine, SearchEngineError
@@ -16,6 +25,13 @@ from enrichfold.search.options import SearchOptions
 from enrichfold.search.types import SearchHit, SearchResult
 
 __all__ = [
+    "AnswerEngine",
+    "AnswerResult",
+    "Citation",
+    "GeminiAnswerEngine",
+    "OpenAIAnswerEngine",
+    "OpenRouterAnswerEngine",
+    "PerplexityAnswerEngine",
     "SearchEngine",
     "SearchEngineError",
     "SearchHit",
