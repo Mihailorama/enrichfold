@@ -206,16 +206,33 @@ async def test_outscraper_uses_ai_utils_params_and_maps_v3(
     request = httpx_mock.get_requests()[0]
     assert request.url.path == "/google-search-v3"
     assert request.headers["x-api-key"] == "out_k"
-    assert _params(httpx_mock) == {"query": "q", "pagesPerQuery": "1", "language": "en"}
+    assert _params(httpx_mock) == {
+        "query": "q",
+        "pagesPerQuery": "1",
+        "language": "en",
+        "async": "false",
+    }
     assert [(h.url, h.snippet, h.rank) for h in hits] == [
         ("https://acme.test/", "Acme makes anvils", 0),
         ("https://b.test/", "b", 1),
     ]
 
 
-async def test_outscraper_pending_reply_has_no_hits(httpx_mock: HTTPXMock) -> None:
-    httpx_mock.add_response(method="GET", json={"id": "req-1", "status": "Pending"})
-    assert await get_search_engine("outscraper")(api_key="k").search("q") == []
+@pytest.mark.parametrize(
+    ("status", "body"),
+    [
+        (200, {"id": "req-1", "status": "Pending"}),
+        (202, {"id": "req-1", "status": "Pending"}),
+        (200, {"error": True, "errorMessage": "Not enough credits"}),
+    ],
+)
+async def test_outscraper_pending_or_error_reply_raises(
+    httpx_mock: HTTPXMock, status: int, body: dict
+) -> None:
+    httpx_mock.add_response(method="GET", status_code=status, json=body)
+    with pytest.raises(SearchEngineError) as exc_info:
+        await get_search_engine("outscraper")(api_key="k").search("q")
+    assert exc_info.value.engine == "outscraper"
 
 
 @pytest.mark.parametrize(
@@ -234,3 +251,36 @@ def test_registered_and_keyed(name: str, monkeypatch: pytest.MonkeyPatch) -> Non
     cls = get_search_engine(name)
     assert not cls().is_available()
     assert cls(api_key="k").is_available()
+
+
+_SECRET = "sk-secret-123"
+
+
+@pytest.mark.parametrize(
+    "name", ["jina", "serpapi_google", "serpapi_yandex", "scrapingdog", "outscraper"]
+)
+@pytest.mark.parametrize(
+    ("status", "kwargs"),
+    [
+        (401, {"json": {"message": "Invalid API key"}}),
+        (429, {"text": "Too Many Requests"}),
+        (502, {"text": "<html>Bad Gateway</html>"}),
+    ],
+)
+async def test_http_errors_keep_status_and_never_leak_key(
+    httpx_mock: HTTPXMock,
+    caplog: pytest.LogCaptureFixture,
+    name: str,
+    status: int,
+    kwargs: dict,
+) -> None:
+    httpx_mock.add_response(status_code=status, **kwargs)
+
+    with caplog.at_level("DEBUG"), pytest.raises(SearchEngineError) as exc_info:
+        await get_search_engine(name)(api_key=_SECRET).search("q")
+
+    message = str(exc_info.value)
+    assert exc_info.value.engine == name
+    assert str(status) in message
+    assert _SECRET not in message
+    assert _SECRET not in caplog.text

@@ -14,7 +14,7 @@ from typing import Any
 
 import httpx
 
-from enrichfold.search.engines.base import SearchEngine
+from enrichfold.search.engines.base import SearchEngine, check_response
 from enrichfold.search.options import SearchOptions, strip_extra_prefix
 from enrichfold.search.types import SearchHit
 
@@ -43,7 +43,7 @@ class ScrapingdogSearchEngine(SearchEngine):
         params = {**_build_params(query, opts), "api_key": self.api_key or ""}
         async with httpx.AsyncClient(timeout=float(opts.timeout_s)) as client:
             response = await client.get(_ENDPOINT, params=params)
-            response.raise_for_status()
+            check_response(response)
             data = response.json()
         return [
             SearchHit(

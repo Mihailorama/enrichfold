@@ -18,15 +18,33 @@ Adding a new search engine
 from __future__ import annotations
 
 import logging
+import re
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, replace
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from enrichfold.search.options import SearchOptions
 from enrichfold.search.types import SearchHit
 
 logger = logging.getLogger(__name__)
+
+_KEY_IN_URL = re.compile(r"(api_key=)[^&\s\"']+")
+
+
+class _RedactApiKey(logging.Filter):
+    """httpx logs every request URL at INFO; SerpAPI and Scrapingdog take the key
+    in the query string, so mask it there."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        message = record.getMessage()
+        if "api_key=" in message:
+            record.msg, record.args = _KEY_IN_URL.sub(r"\1***", message), ()
+        return True
+
+
+if not any(isinstance(f, _RedactApiKey) for f in logging.getLogger("httpx").filters):
+    logging.getLogger("httpx").addFilter(_RedactApiKey())
 
 
 @dataclass(frozen=True)
@@ -38,6 +56,16 @@ class SearchEngineError(Exception):
 
     def __str__(self) -> str:
         return f"[{self.engine}] {self.message}"
+
+
+def check_response(response: Any) -> None:
+    """Raise on an HTTP error with the status and the start of the body.
+
+    Never ``httpx.Response.raise_for_status()``: its message carries the full
+    request URL, which holds the API key for query-string-keyed vendors.
+    """
+    if response.is_error:
+        raise RuntimeError(f"HTTP {response.status_code}: {response.text[:200]}")
 
 
 class SearchEngine(ABC):
@@ -91,4 +119,4 @@ class SearchEngine(ABC):
         return not self.REQUIRES_API_KEY or bool(self.api_key)
 
 
-__all__ = ["SearchEngine", "SearchEngineError"]
+__all__ = ["SearchEngine", "SearchEngineError", "check_response"]

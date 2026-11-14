@@ -7,6 +7,10 @@ Reads ``OUTSCRAPER_API_KEY`` (``X-API-KEY`` header). Parameters copy ai-utils'
 list of results per query; hits are cut to ``opts.count``. The snippet is
 Outscraper's ``description``, else ``pre_snippet`` / ``snippet``, the fields
 ai-utils reads.
+
+The engine adds ``async=false`` (ai-utils omits it; Outscraper then answers
+202 with a request id). A 202, a ``Pending`` status or an ``error`` /
+``errorMessage`` body raises.
 """
 
 from __future__ import annotations
@@ -16,7 +20,7 @@ from typing import Any
 
 import httpx
 
-from enrichfold.search.engines.base import SearchEngine
+from enrichfold.search.engines.base import SearchEngine, check_response
 from enrichfold.search.options import SearchOptions, strip_extra_prefix
 from enrichfold.search.types import SearchHit
 
@@ -28,6 +32,9 @@ def _build_params(query: str, opts: SearchOptions) -> dict[str, Any]:
         "query": query,
         "pagesPerQuery": 1,
         "language": opts.language or "en",
+        # Outscraper defaults to async (202 + request id); the official client
+        # sends async=false to get results in the same request.
+        "async": "false",
     }
     if opts.country is not None:
         params["region"] = opts.country
@@ -55,8 +62,15 @@ class OutscraperSearchEngine(SearchEngine):
                 params=_build_params(query, opts),
                 headers={"X-API-KEY": self.api_key or ""},
             )
-            response.raise_for_status()
-            data = response.json()
+        check_response(response)
+        data = response.json()
+        if (
+            response.status_code == 202
+            or data.get("status") == "Pending"
+            or data.get("error")
+        ):
+            message = data.get("errorMessage") or data.get("status") or "error"
+            raise RuntimeError(f"Outscraper HTTP {response.status_code}: {message}")
         return [
             SearchHit(
                 url=item["link"],

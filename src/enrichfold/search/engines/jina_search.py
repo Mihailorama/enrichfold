@@ -17,7 +17,7 @@ from typing import Any
 
 import httpx
 
-from enrichfold.search.engines.base import SearchEngine
+from enrichfold.search.engines.base import SearchEngine, check_response
 from enrichfold.search.options import SearchOptions, strip_extra_prefix
 from enrichfold.search.types import SearchHit
 
@@ -54,7 +54,7 @@ class JinaSearchEngine(SearchEngine):
             response = await client.post(
                 _ENDPOINT, json=_build_body(query, opts), headers=headers
             )
-            response.raise_for_status()
+            check_response(response)
             data = response.json()
         return [
             SearchHit(

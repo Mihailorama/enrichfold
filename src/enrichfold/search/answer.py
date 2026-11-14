@@ -27,7 +27,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any, ClassVar
 
-from enrichfold.search.engines.base import SearchEngineError
+from enrichfold.search.engines.base import SearchEngineError, check_response
 
 Call = Callable[[str, dict[str, Any]], Awaitable[dict[str, Any]]]
 
@@ -117,6 +117,10 @@ class AnswerEngine:
         )
         self.timeout_s = timeout_s
 
+    def is_available(self) -> bool:
+        """Whether a key is present (a caller-injected ``call`` may not need one)."""
+        return bool(self.api_key)
+
     def request(self, query: str) -> tuple[str, dict[str, Any]]:
         """The vendor URL and JSON body for ``query``."""
         raise NotImplementedError
@@ -132,8 +136,8 @@ class AnswerEngine:
 
         async with httpx.AsyncClient(timeout=self.timeout_s) as client:
             response = await client.post(url, json=body, headers=self.headers())
-            response.raise_for_status()
-            return response.json()
+        check_response(response)
+        return response.json()
 
     async def answer(self, query: str) -> AnswerResult:
         url, body = self.request(query)

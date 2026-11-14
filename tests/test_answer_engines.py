@@ -289,3 +289,37 @@ async def test_default_transport_sends_key_from_env(
     assert request.headers["x-goog-api-key"] == "g_k"
     assert json.loads(request.content)["tools"] == [{"googleSearch": {}}]
     assert result.text == "ok"
+
+
+async def test_default_transport_error_keeps_vendor_body(
+    httpx_mock: HTTPXMock,
+) -> None:
+    httpx_mock.add_response(
+        method="POST",
+        url="https://api.perplexity.ai/chat/completions",
+        status_code=429,
+        json={"error": {"message": "rate limit exceeded"}},
+    )
+
+    with pytest.raises(SearchEngineError) as exc_info:
+        await PerplexityAnswerEngine("sonar-pro", api_key="pplx-secret").answer("q")
+
+    message = str(exc_info.value)
+    assert "429" in message and "rate limit exceeded" in message
+    assert "pplx-secret" not in message
+
+
+@pytest.mark.parametrize(
+    "cls",
+    [
+        PerplexityAnswerEngine,
+        GeminiAnswerEngine,
+        OpenAIAnswerEngine,
+        OpenRouterAnswerEngine,
+    ],
+)
+def test_is_available_needs_a_key(cls: type, monkeypatch: pytest.MonkeyPatch) -> None:
+    for env in cls.KEY_ENV:
+        monkeypatch.delenv(env, raising=False)
+    assert cls("m").is_available() is False
+    assert cls("m", api_key="k").is_available() is True

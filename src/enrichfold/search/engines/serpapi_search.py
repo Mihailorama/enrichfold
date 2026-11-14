@@ -22,7 +22,7 @@ from typing import Any, ClassVar
 
 import httpx
 
-from enrichfold.search.engines.base import SearchEngine
+from enrichfold.search.engines.base import SearchEngine, check_response
 from enrichfold.search.options import SearchOptions, strip_extra_prefix
 from enrichfold.search.types import SearchHit
 
@@ -51,13 +51,13 @@ class _SerpApiEngine(SearchEngine):
         params = {**self.build_params(query, opts), "api_key": self.api_key or ""}
         async with httpx.AsyncClient(timeout=float(opts.timeout_s)) as client:
             response = await client.get(_ENDPOINT, params=params)
-            data = response.json()
+        check_response(response)
+        data = response.json()
         error = data.get("error")
         if error:
             if "hasn't returned any results" in str(error):
                 return []
             raise RuntimeError(f"SerpAPI error: {str(error)[:200]}")
-        response.raise_for_status()
         return [
             SearchHit(
                 url=item["link"],
