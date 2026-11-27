@@ -107,6 +107,12 @@ _REGISTRY: dict[str, Callable[[], type[SearchEngine]]] = {
             fromlist=["OutscraperSearchEngine"],
         ).OutscraperSearchEngine
     ),
+    "twingly": lambda: (
+        __import__(
+            "enrichfold.search.engines.twingly_search",
+            fromlist=["TwinglySearchEngine"],
+        ).TwinglySearchEngine
+    ),
     "duckduckgo": lambda: (
         __import__(
             "enrichfold.search.engines.duckduckgo", fromlist=["DuckDuckGoSearchEngine"]

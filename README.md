@@ -7,7 +7,7 @@ Provider-neutral, provenance-first entity enrichment for people and companies.
 `enrichfold` has an offline-first enrichment core and an optional web search
 package. Applications supply credentials. Search engines include Exa, Parallel,
 You.com, Tavily, Linkup, Seltz, TinyFish, Nimble, Browserbase, Serper, Keenable,
-Jina, SerpAPI (Google, Yandex), Scrapingdog, Outscraper, DuckDuckGo, and Treg.
+Jina, SerpAPI (Google, Yandex), Scrapingdog, Outscraper, Twingly News, DuckDuckGo, and Treg.
 Answer engines (Perplexity, Gemini grounding, OpenAI web search, OpenRouter
 `:online`) return an answer with its citations. Optional Keenable, Treg catalog, and Scrapefold page adapters are also available.
 Every accepted attribute retains its source
@@ -217,6 +217,7 @@ Gemini citations are Google's grounding redirect URLs with domain titles.
 SERP engines from ai-utils read `JINA_API_KEY`, `SERPAPI_API_KEY`,
 `SCRAPINGDOG_API_KEY` and `OUTSCRAPER_API_KEY` (ai-utils' `JINAAI_API_KEY`,
 `SERAPI_API_KEY` and `PERPLEXITYAI_API_KEY` names also work).
+The `twingly` news engine reads `TWINGLY_API_KEY` (a trial key allows 100 requests).
 `scripts/parity_ai_utils.py` compares live results with a saved ai-utils output.
 
 ## Treg: people, companies, and other catalog sources
