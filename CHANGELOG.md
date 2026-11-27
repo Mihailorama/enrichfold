@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.10.0 — 2026-11-27
+
 - Add the `twingly` news search engine (Twingly News Search API,
   `TWINGLY_API_KEY`). `opts.country` maps to `locations`; other body fields go
   through `twingly_*` extras; hits keep the full article document in `raw`.
