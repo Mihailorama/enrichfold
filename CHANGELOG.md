@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add the `twingly` news search engine (Twingly News Search API,
+  `TWINGLY_API_KEY`). `opts.country` maps to `locations`; other body fields go
+  through `twingly_*` extras; hits keep the full article document in `raw`.
+
 ## 0.9.0 — 2026-11-14
 
 - Add SERP engines ported from ai-utils: `jina` (s.jina.ai), `serpapi_google`,
